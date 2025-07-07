@@ -10,13 +10,14 @@ class MuJoCoSimulator:
     def __init__(self, xml_path=None):
 
         if xml_path is None:
-            xml_path = os.path.join(os.path.dirname(__file__), 'xml', 'mjx_scene.xml')
+            xml_path = os.path.join(os.path.dirname(__file__), 'panda_arm.xml')
         
 
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
-        
-
+        print("dof_damping      =", self.model.dof_damping)      # 全 0 才算关干净
+        print("dof_frictionloss =", self.model.dof_frictionloss)
+        self.model.opt.integrator = mujoco.mjtIntegrator.mjINT_RK4
         self.n_joints = self.model.nv  # 关节数
         self.n_actuators = self.model.nu  # 执行器数
         
@@ -46,8 +47,17 @@ class MuJoCoSimulator:
     
     def step(self, u):
         # 设置控制输入
-        self.data.ctrl[:len(u)] = u
-        
+        print("step u =", u)
+        print("qpos =", self.data.qpos[:7])
+        print("qvel =", self.data.qvel[:7])
+        self.data.qfrc_applied[:len(u)] = u
+        mujoco.mj_forward(self.model, self.data)      # 更新缓冲区
+        print("ctrl =", self.data.ctrl)
+        print("τ_act =", self.data.qfrc_actuator)
+        print("qfrc_bias     =", self.data.qfrc_bias)      # Coriolis + 重力
+        print("qfrc_passive  =", self.data.qfrc_passive)   # 内部阻尼 + 重力补偿
+        print("qfrc_applied  =", self.data.qfrc_applied)   # 你刚写进去的 τ
+        print("qfrc_actuator =", self.data.qfrc_actuator) 
         # 执行多个子步骤
         for _ in range(self.substeps):
             mujoco.mj_step(self.model, self.data)

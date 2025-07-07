@@ -79,22 +79,7 @@ int main()
     x_current[13] = 0.0;
 
   
-    x_current[0] = 0;
-    x_current[1] = 0;
-    x_current[2] = 0;
-    x_current[3] = 0;
-    x_current[4] = 0;
-    x_current[5] = 0;
-    x_current[6] = 0;
-    x_current[7] = 0;
-    x_current[8] = 0;
-    x_current[9] = 0;
-    x_current[10] = 0;
-    x_current[11] = 0;
-    x_current[12] = 0;
-    x_current[13] = 0;
-    
-  
+    printf("main_sim: initial state not defined, should be in lbx_0, using zero vector.");
 
 
     // initial value for control input
@@ -107,6 +92,8 @@ int main()
     u0[5] = 0.0;
     u0[6] = 0.0;
 
+  
+    double S_forw[NX*(NX+NU)];
   
 
 
@@ -131,6 +118,19 @@ int main()
         sim_out_get(acados_sim_config, acados_sim_dims,
                acados_sim_out, "x", x_current);
 
+    
+        sim_out_get(acados_sim_config, acados_sim_dims,
+               acados_sim_out, "S_forw", S_forw);
+
+        printf("\nS_forw, %d\n", ii);
+        for (int i = 0; i < NX; i++)
+        {
+            for (int j = 0; j < NX+NU; j++)
+            {
+                printf("%+.3e ", S_forw[j * NX + i]);
+            }
+            printf("\n");
+        }
     
 
         // print solution

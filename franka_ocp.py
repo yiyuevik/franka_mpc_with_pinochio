@@ -61,15 +61,37 @@ def create_ocp_solver(x0):
     ocp.cost.yref_e = p_target
     ocp.dims.ny_e = ocp.cost.yref_e.shape[0]
     
-    # Constraints
-
-    # ocp.constraints.idxbu = np.arange(Nu)
-    # ocp.constraints.lbu = -config.tau_max*np.ones(Nu)
-    # ocp.constraints.ubu = +config.tau_max*np.ones(Nu)
-
-    # ocp.constraints.idxbx = np.arange(Nx/2)    # 这里把 q(前7个)放到bx中
-    # ocp.constraints.lbx = q_min
-    # ocp.constraints.ubx = q_max
+    # Constraints (from panda_arm.urdf)
+    # 关节角度限制（单位：弧度）
+    # panda_joint1: [-2.8973, 2.8973]
+    # panda_joint2: [-1.7628, 1.7628]
+    # panda_joint3: [-2.8973, 2.8973]
+    # panda_joint4: [-3.0718, -0.0698]
+    # panda_joint5: [-2.8973, 2.8973]
+    # panda_joint6: [-0.0175, 3.7525]
+    # panda_joint7: [-2.8973, 2.8973]
+    q_min = np.array([
+        -2.8973,
+        -1.7628,
+        -2.8973,
+        -3.0718,
+        -2.8973,
+        -0.0175,
+        -2.8973
+    ])
+    q_max = np.array([
+        2.8973,
+        1.7628,
+        2.8973,
+        -0.0698,
+        2.8973,
+        3.7525,
+        2.8973
+    ])
+    # 只对前7维q加约束
+    ocp.constraints.idxbx = np.arange(7)
+    ocp.constraints.lbx = q_min
+    ocp.constraints.ubx = q_max
 
     ocp.constraints.x0 = x0
 
@@ -89,14 +111,18 @@ def create_ocp_solver(x0):
 
     ocp.solver_options.qp_solver = 'FULL_CONDENSING_QPOASES' 
     ocp.solver_options.hessian_approx = 'GAUSS_NEWTON'
-    ocp.solver_options.integrator_type = 'IRK'
+    # ocp.solver_options.integrator_type = 'IRK'
+    ocp.solver_options.integrator_type    = 'ERK'   # 显式 RK
+    ocp.solver_options.sim_method_num_stages = 4    # 4 个 stage = RK4
+    # ocp.solver_options.sim_method_order      = 4    # 四阶
+    ocp.solver_options.sim_method_num_steps  = 10
     ocp.solver_options.nlp_solver_type = 'SQP_RTI'
     ocp.solver_options.nlp_solver_max_iter = 150
     ocp.solver_options.nlp_solver_tol_stat = 5e-3
     ocp.solver_options.levenberg_marquardt = 1.0
 
     # 构造 OCP 求解器
-    isbuild = False
+    isbuild = True
     acados_solver = AcadosOcpSolver(ocp, json_file="acados_ocp_double_pendulum.json", generate= isbuild, build = isbuild)
 
     acados_integrator = AcadosSimSolver(ocp, json_file = "acados_ocp_double_pendulum.json", generate = isbuild, build = isbuild)

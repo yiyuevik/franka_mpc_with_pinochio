@@ -80,39 +80,40 @@ int franka_14dof_acados_sim_create(franka_14dof_sim_solver_capsule * capsule)
     ext_fun_opts.external_workspace = false;
 
     
-    capsule->sim_impl_dae_fun = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi));
-    capsule->sim_impl_dae_fun_jac_x_xdot_z = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi));
-    capsule->sim_impl_dae_jac_x_xdot_u_z = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi));
-    // external functions (implicit model)
-    capsule->sim_impl_dae_fun->casadi_fun = &franka_14dof_impl_dae_fun;
-    capsule->sim_impl_dae_fun->casadi_work = &franka_14dof_impl_dae_fun_work;
-    capsule->sim_impl_dae_fun->casadi_sparsity_in = &franka_14dof_impl_dae_fun_sparsity_in;
-    capsule->sim_impl_dae_fun->casadi_sparsity_out = &franka_14dof_impl_dae_fun_sparsity_out;
-    capsule->sim_impl_dae_fun->casadi_n_in = &franka_14dof_impl_dae_fun_n_in;
-    capsule->sim_impl_dae_fun->casadi_n_out = &franka_14dof_impl_dae_fun_n_out;
-    external_function_param_casadi_create(capsule->sim_impl_dae_fun, np, &ext_fun_opts);
+    // explicit ode
+    capsule->sim_expl_vde_forw = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi));
+    capsule->sim_vde_adj_casadi = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi));
+    capsule->sim_expl_ode_fun_casadi = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi));
 
-    capsule->sim_impl_dae_fun_jac_x_xdot_z->casadi_fun = &franka_14dof_impl_dae_fun_jac_x_xdot_z;
-    capsule->sim_impl_dae_fun_jac_x_xdot_z->casadi_work = &franka_14dof_impl_dae_fun_jac_x_xdot_z_work;
-    capsule->sim_impl_dae_fun_jac_x_xdot_z->casadi_sparsity_in = &franka_14dof_impl_dae_fun_jac_x_xdot_z_sparsity_in;
-    capsule->sim_impl_dae_fun_jac_x_xdot_z->casadi_sparsity_out = &franka_14dof_impl_dae_fun_jac_x_xdot_z_sparsity_out;
-    capsule->sim_impl_dae_fun_jac_x_xdot_z->casadi_n_in = &franka_14dof_impl_dae_fun_jac_x_xdot_z_n_in;
-    capsule->sim_impl_dae_fun_jac_x_xdot_z->casadi_n_out = &franka_14dof_impl_dae_fun_jac_x_xdot_z_n_out;
-    external_function_param_casadi_create(capsule->sim_impl_dae_fun_jac_x_xdot_z, np, &ext_fun_opts);
+    capsule->sim_expl_vde_forw->casadi_fun = &franka_14dof_expl_vde_forw;
+    capsule->sim_expl_vde_forw->casadi_n_in = &franka_14dof_expl_vde_forw_n_in;
+    capsule->sim_expl_vde_forw->casadi_n_out = &franka_14dof_expl_vde_forw_n_out;
+    capsule->sim_expl_vde_forw->casadi_sparsity_in = &franka_14dof_expl_vde_forw_sparsity_in;
+    capsule->sim_expl_vde_forw->casadi_sparsity_out = &franka_14dof_expl_vde_forw_sparsity_out;
+    capsule->sim_expl_vde_forw->casadi_work = &franka_14dof_expl_vde_forw_work;
+    external_function_param_casadi_create(capsule->sim_expl_vde_forw, np, &ext_fun_opts);
 
-    capsule->sim_impl_dae_jac_x_xdot_u_z->casadi_fun = &franka_14dof_impl_dae_jac_x_xdot_u_z;
-    capsule->sim_impl_dae_jac_x_xdot_u_z->casadi_work = &franka_14dof_impl_dae_jac_x_xdot_u_z_work;
-    capsule->sim_impl_dae_jac_x_xdot_u_z->casadi_sparsity_in = &franka_14dof_impl_dae_jac_x_xdot_u_z_sparsity_in;
-    capsule->sim_impl_dae_jac_x_xdot_u_z->casadi_sparsity_out = &franka_14dof_impl_dae_jac_x_xdot_u_z_sparsity_out;
-    capsule->sim_impl_dae_jac_x_xdot_u_z->casadi_n_in = &franka_14dof_impl_dae_jac_x_xdot_u_z_n_in;
-    capsule->sim_impl_dae_jac_x_xdot_u_z->casadi_n_out = &franka_14dof_impl_dae_jac_x_xdot_u_z_n_out;
-    external_function_param_casadi_create(capsule->sim_impl_dae_jac_x_xdot_u_z, np, &ext_fun_opts);
+    capsule->sim_vde_adj_casadi->casadi_fun = &franka_14dof_expl_vde_adj;
+    capsule->sim_vde_adj_casadi->casadi_n_in = &franka_14dof_expl_vde_adj_n_in;
+    capsule->sim_vde_adj_casadi->casadi_n_out = &franka_14dof_expl_vde_adj_n_out;
+    capsule->sim_vde_adj_casadi->casadi_sparsity_in = &franka_14dof_expl_vde_adj_sparsity_in;
+    capsule->sim_vde_adj_casadi->casadi_sparsity_out = &franka_14dof_expl_vde_adj_sparsity_out;
+    capsule->sim_vde_adj_casadi->casadi_work = &franka_14dof_expl_vde_adj_work;
+    external_function_param_casadi_create(capsule->sim_vde_adj_casadi, np, &ext_fun_opts);
+
+    capsule->sim_expl_ode_fun_casadi->casadi_fun = &franka_14dof_expl_ode_fun;
+    capsule->sim_expl_ode_fun_casadi->casadi_n_in = &franka_14dof_expl_ode_fun_n_in;
+    capsule->sim_expl_ode_fun_casadi->casadi_n_out = &franka_14dof_expl_ode_fun_n_out;
+    capsule->sim_expl_ode_fun_casadi->casadi_sparsity_in = &franka_14dof_expl_ode_fun_sparsity_in;
+    capsule->sim_expl_ode_fun_casadi->casadi_sparsity_out = &franka_14dof_expl_ode_fun_sparsity_out;
+    capsule->sim_expl_ode_fun_casadi->casadi_work = &franka_14dof_expl_ode_fun_work;
+    external_function_param_casadi_create(capsule->sim_expl_ode_fun_casadi, np, &ext_fun_opts);
 
     
 
     // sim plan & config
     sim_solver_plan_t plan;
-    plan.sim_solver = IRK;
+    plan.sim_solver = ERK;
 
     // create correct config based on plan
     sim_config * franka_14dof_sim_config = sim_config_create(plan);
@@ -136,13 +137,25 @@ int franka_14dof_acados_sim_create(franka_14dof_sim_solver_capsule * capsule)
     sim_collocation_type collocation_type = GAUSS_LEGENDRE;
     sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "collocation_type", &collocation_type);
 
- 
+
     tmp_int = 4;
     sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "num_stages", &tmp_int);
     tmp_int = 1;
     sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "num_steps", &tmp_int);
-    tmp_bool = 0;
-    sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "jac_reuse", &tmp_bool);
+
+    // options that are not available to AcadosOcpSolver
+    //  (in OCP they will be determined by other options, like exact_hessian)
+    tmp_bool = true;
+    sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "sens_forw", &tmp_bool);
+    tmp_bool = false;
+    sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "sens_adj", &tmp_bool);
+    tmp_bool = false;
+    sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "sens_algebraic", &tmp_bool);
+    tmp_bool = false;
+    sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "sens_hess", &tmp_bool);
+    tmp_bool = true;
+    sim_opts_set(franka_14dof_sim_config, franka_14dof_sim_opts, "output_z", &tmp_bool);
+
 
 
     // sim in / out
@@ -156,11 +169,11 @@ int franka_14dof_acados_sim_create(franka_14dof_sim_solver_capsule * capsule)
 
     // model functions
     franka_14dof_sim_config->model_set(franka_14dof_sim_in->model,
-                 "impl_ode_fun", capsule->sim_impl_dae_fun);
+                 "expl_vde_forw", capsule->sim_expl_vde_forw);
     franka_14dof_sim_config->model_set(franka_14dof_sim_in->model,
-                 "impl_ode_fun_jac_x_xdot", capsule->sim_impl_dae_fun_jac_x_xdot_z);
+                 "expl_vde_adj", capsule->sim_vde_adj_casadi);
     franka_14dof_sim_config->model_set(franka_14dof_sim_in->model,
-                 "impl_ode_jac_x_xdot_u", capsule->sim_impl_dae_jac_x_xdot_u_z);
+                 "expl_ode_fun", capsule->sim_expl_ode_fun_casadi);
 
     // sim solver
     sim_solver *franka_14dof_sim_solver = sim_solver_create(franka_14dof_sim_config,
@@ -229,12 +242,12 @@ int franka_14dof_acados_sim_free(franka_14dof_sim_solver_capsule *capsule)
     sim_config_destroy(capsule->acados_sim_config);
 
     // free external function
-    external_function_param_casadi_free(capsule->sim_impl_dae_fun);
-    external_function_param_casadi_free(capsule->sim_impl_dae_fun_jac_x_xdot_z);
-    external_function_param_casadi_free(capsule->sim_impl_dae_jac_x_xdot_u_z);
-    free(capsule->sim_impl_dae_fun);
-    free(capsule->sim_impl_dae_fun_jac_x_xdot_z);
-    free(capsule->sim_impl_dae_jac_x_xdot_u_z);
+    external_function_param_casadi_free(capsule->sim_expl_vde_forw);
+    external_function_param_casadi_free(capsule->sim_vde_adj_casadi);
+    external_function_param_casadi_free(capsule->sim_expl_ode_fun_casadi);
+    free(capsule->sim_expl_vde_forw);
+    free(capsule->sim_vde_adj_casadi);
+    free(capsule->sim_expl_ode_fun_casadi);
 
     return 0;
 }
@@ -250,9 +263,9 @@ int franka_14dof_acados_sim_update_params(franka_14dof_sim_solver_capsule *capsu
             " External function has %i parameters. Exiting.\n", np, casadi_np);
         exit(1);
     }
-    capsule->sim_impl_dae_fun[0].set_param(capsule->sim_impl_dae_fun, p);
-    capsule->sim_impl_dae_fun_jac_x_xdot_z[0].set_param(capsule->sim_impl_dae_fun_jac_x_xdot_z, p);
-    capsule->sim_impl_dae_jac_x_xdot_u_z[0].set_param(capsule->sim_impl_dae_jac_x_xdot_u_z, p);
+    capsule->sim_expl_vde_forw[0].set_param(capsule->sim_expl_vde_forw, p);
+    capsule->sim_vde_adj_casadi[0].set_param(capsule->sim_vde_adj_casadi, p);
+    capsule->sim_expl_ode_fun_casadi[0].set_param(capsule->sim_expl_ode_fun_casadi, p);
 
     return status;
 }
