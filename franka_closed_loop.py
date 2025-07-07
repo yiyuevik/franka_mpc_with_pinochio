@@ -21,12 +21,11 @@ def compare_one_step():
     对比 acados integrator 和 MuJoCo 仿真在同样初始状态、同样输入下单步仿真结果
     """
     x0 = np.zeros(14)
-    u  = np.array([1.0, 1.0, 1.0, 3.8, -1.54, 1.0, 1.89])   # ← 加逗号
+    u  = np.array([1.0, 1.0, 1.0, 3.8, -1.54, 1.0, 1.89]) 
     mujoco_sim = MuJoCoSimulator()
     ocp, ocp_solver, integrator = create_ocp_solver(x0)
     print("current T =", integrator.get("T"))
-    # ★ 关键：保证 SimSolver 每次只跨一个 Ts ★
-    # integrator.set("T", config.Ts)            # 0.01 s
+ 
 
     # acados 积分一步
     integrator.set("x", x0)
@@ -52,7 +51,7 @@ def compare_n_steps(n=10):
     mujoco_sim = MuJoCoSimulator()
     ocp, ocp_solver, integrator = create_ocp_solver(x0)
     x_acados = x0.copy()
-    x_mujoco = x0.copy()  # 只取前9维传给mujoco
+    x_mujoco = x0.copy()  
     print("=== 连续%d步仿真对比 ===" % n)
     for i in range(n):
         # acados integrator仿真一步
@@ -68,8 +67,8 @@ def compare_n_steps(n=10):
         print(f"Step {i+1}:")
         print("  x_next_acados:", x_next_acados)
         print("  x_next_mujoco:", x_next_mujoco)
-        # 只对前9维做差异对比
-        print("  diff (first 9):", np.abs(x_next_acados - x_next_mujoco))
+
+        print("  diff :", np.abs(x_next_acados - x_next_mujoco))
         x_acados = x_next_acados.copy()
         x_mujoco = x_next_mujoco.copy()
 

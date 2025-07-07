@@ -10,7 +10,7 @@ from franka_closed_loop import create_ocp_solver
 import pinocchio as pin
 
 def rk4_aba_step(q, v, tau, h, model, data):
-    """单个 RK4 子步（显式四阶）"""
+    # 单个 RK4 
     def acc(q_, v_):
         return pin.aba(model, data, q_, v_, tau)
     k1q = v
@@ -36,7 +36,7 @@ def pin_integrate_rk4(q0, v0, tau, dt, n_sub):
     return np.concatenate([q, v])
 
 def create_sim_integrator():
-    """生成 tf = config.Ts 的 SimSolver，用于与 MuJoCo 对比"""
+ 
     sim = AcadosSim()
     sim.model = export_franka_ode_model()
 
@@ -52,12 +52,12 @@ def create_sim_integrator():
 
 
 def compare_one_step():
-    """单步仿真对比"""
+
     x0 = np.zeros(14)
-    # 任意关节力矩输入（注意逗号）
+  
     u = np.array([1.0, 1.0, 1.0, 3.8, -1.54, 1.0, 1.89])
 
-    # 仅为初始化 ocp_solver，可不直接使用
+
     sim = create_sim_integrator()
 
     mujoco = MuJoCoSimulator()
@@ -82,7 +82,7 @@ def compare_one_step():
 
 
 def compare_n_steps(n=10):
-    """连续 n 步仿真对比"""
+   
     x0 = np.zeros(14)
     u = np.zeros(7)
 
